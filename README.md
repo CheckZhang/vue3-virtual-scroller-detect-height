@@ -4,9 +4,6 @@
 
 A high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it renders only visible items to handle large datasets efficiently.
 
-## Effect
-![Virtual Scroll By Render Effect](./VirtualScrollByRender.gif)
-
 ## Get Start
 
 first, install the package:
@@ -96,19 +93,42 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 
 ## Example Usage
 
+![Virtual Scroll By Render Effect](./VirtualScrollByRender.gif)
+
 ```vue
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
+
 import { VirtualScrollBaseRender } from '@vben/elementplusplus';
 
-const items = ref<Array<{ content: string; height: number; index: number }>>([]);
-const virtualScrollRef = ref<InstanceType<typeof VirtualScrollBaseRender> | null>(null);
-const showDirectory = ref(false);
+const items = ref<Array<{ content: string; height: number; index: number }>>(
+  [],
+);
+const virtualScrollRef = ref<InstanceType<
+  typeof VirtualScrollBaseRender
+> | null>(null);
 
 const generateRandomText = () => {
   const words = [
-    'Lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
-    'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua',
+    'Lorem',
+    'ipsum',
+    'dolor',
+    'sit',
+    'amet',
+    'consectetur',
+    'adipiscing',
+    'elit',
+    'sed',
+    'do',
+    'eiusmod',
+    'tempor',
+    'incididunt',
+    'ut',
+    'labore',
+    'et',
+    'dolore',
+    'magna',
+    'aliqua',
   ];
   const length = Math.floor(Math.random() * 200) + 20;
   let text = '';
@@ -122,15 +142,14 @@ const generateItems = () => {
   for (let i = 0; i < 1000; i++) {
     items.value.push({
       index: i,
-      height: 80,
+      height: 0,
       content: generateRandomText(),
     });
   }
 };
 
-const navigateToItem = (index: number) => {
+const navigateToItem = async (index: number) => {
   virtualScrollRef.value?.scrollToItem(index);
-  showDirectory.value = false;
 };
 
 const directoryItems = computed(() => {
@@ -148,19 +167,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-screen">
-    <div class="w-64 border-r bg-gray-50 p-4">
-      <button
-        @click="showDirectory = !showDirectory"
-        class="mb-4 w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-      >
-        {{ showDirectory ? 'Hide' : 'Show' }} Directory
-      </button>
-
-      <div v-if="showDirectory" class="max-h-96 overflow-y-auto">
+  <div class="flex h-[700px] border">
+    <div class="flex h-full w-64 flex-col border-r bg-gray-50 p-4">
+      <div class="font-bold">Navigation</div>
+      <div class="flex-grow overflow-y-auto">
         <div
           v-for="item in directoryItems"
-          :key="item.index"
+          :key="`dd_${item.index}`"
           @click="navigateToItem(item.index)"
           class="cursor-pointer rounded p-2 hover:bg-blue-100"
         >
@@ -173,12 +186,22 @@ onMounted(() => {
       <VirtualScrollBaseRender
         ref="virtualScrollRef"
         :items="items"
-        :container-height="500"
+        :container-height="700"
         :visible-items-count="50"
         :buffer-size="50"
+        :gap="20"
       >
-        <template #default="{ item }">
-          <div class="border-b border-gray-300 bg-white p-4">
+        <template #default="{ item, api }">
+          <div
+            class="border-b border-gray-300 bg-white p-4"
+            :ref="
+              async (ele) => {
+                if (ele) {
+                  api.measureItemHeight(item.index);
+                }
+              }
+            "
+          >
             <div class="mb-2 text-lg font-semibold">
               Item {{ item.index + 1 }}
             </div>
@@ -189,6 +212,11 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Add any custom styles if needed */
+</style>
+
 ```
 
 ## Features
