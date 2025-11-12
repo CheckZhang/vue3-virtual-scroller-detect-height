@@ -99,7 +99,7 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-import { VirtualScrollBaseRender } from '@vben/elementplusplus';
+import { VirtualScrollBaseRender } from 'vue3-virtual-scroller-detect-height';
 
 const items = ref<Array<{ content: string; height: number; index: number }>>(
   [],
