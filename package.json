@@ -1,0 +1,17 @@
+{
+  "name": "vue3-virtual-scroller-detect-height",
+  "version": "1.0.1",
+  "description": " A high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it renders only visible items to handle large datasets efficiently.",
+  "keywords": [
+    "dynamic virtual scroll"
+  ],
+  "license": "ISC",
+  "author": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.vue",
+  "dependencies": {
+    "vue": "^3.2.0"
+  }
+}
