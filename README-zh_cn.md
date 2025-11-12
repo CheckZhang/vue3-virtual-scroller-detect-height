@@ -31,6 +31,7 @@ import { VirtualScrollBaseRender } from '@vben/elementplusplus';
             :ref="
               async (ele) => {
                 if (ele) {
+                  await nextTick();
                   api.measureItemHeight(item.index);
                 }
               }
@@ -96,7 +97,7 @@ import { VirtualScrollBaseRender } from '@vben/elementplusplus';
 
 ```vue
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 
 import VirtualScrollBaseRender from 'vue3-virtual-scroller-detect-height';
 
@@ -196,6 +197,7 @@ onMounted(() => {
             :ref="
               async (ele) => {
                 if (ele) {
+                  await nextTick();
                   api.measureItemHeight(item.index);
                 }
               }

@@ -26,7 +26,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   mouseenter: [];
-  remove: [index: number, id: string];
   scroll: [index: number];
 }>();
 
@@ -137,42 +136,9 @@ watch(
     nextTick(() => {
       items1.value = props.items;
       measureItemHeights();
-      setupMutationObserver();
     });
   },
 );
-
-const setupMutationObserver = () => {
-  if (!scrollContainer.value) return;
-
-  if (mutationObserver) {
-    mutationObserver.disconnect();
-  }
-
-  mutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.removedNodes.forEach((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const element = node as HTMLElement;
-          const clipId = element
-            .querySelector('[data-clip-id]')
-            ?.getAttribute('data-clip-id');
-          if (clipId) {
-            const item = items1.value.find((item) => item.id === clipId);
-            if (item) {
-              emit('remove', item.index, item.id);
-            }
-          }
-        }
-      });
-    });
-  });
-
-  mutationObserver.observe(scrollContainer.value, {
-    childList: true,
-    subtree: true,
-  });
-};
 
 const api = {
   scrollToItem,
@@ -183,17 +149,6 @@ const api = {
 };
 
 defineExpose(api);
-
-// Cleanup on unmount
-watch(
-  () => scrollContainer.value,
-  (newContainer) => {
-    if (newContainer) {
-      nextTick(() => setupMutationObserver());
-    }
-  },
-  { immediate: true },
-);
 
 // Cleanup observer when component unmounts
 const cleanup = () => {
