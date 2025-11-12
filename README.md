@@ -35,7 +35,6 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
             :ref="
               async (ele) => {
                 if (ele) {
-                  await nextTick();
                   api.measureItemHeight(item.index);
                 }
               }

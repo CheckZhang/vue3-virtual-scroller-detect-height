@@ -35,7 +35,6 @@ import { VirtualScrollBaseRender } from '@vben/elementplusplus';
             :ref="
               async (ele) => {
                 if (ele) {
-                  await nextTick();
                   api.measureItemHeight(item.index);
                 }
               }
