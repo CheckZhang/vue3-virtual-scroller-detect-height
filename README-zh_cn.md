@@ -98,7 +98,7 @@ import { VirtualScrollBaseRender } from '@vben/elementplusplus';
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
-import { VirtualScrollBaseRender } from 'vue3-virtual-scroller-detect-height';
+import VirtualScrollBaseRender from 'vue3-virtual-scroller-detect-height';
 
 const items = ref<Array<{ content: string; height: number; index: number }>>(
   [],
