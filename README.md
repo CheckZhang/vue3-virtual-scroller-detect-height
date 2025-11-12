@@ -1,7 +1,11 @@
 # VirtualScrollByRender Component API Documentation
 
 ## Overview
-A high-performance virtual scrolling component for Vue 3 that renders only visible items to handle large datasets efficiently.
+
+A high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it renders only visible items to handle large datasets efficiently.
+
+## Effect
+![Virtual Scroll By Render Effect](./VirtualScrollByRender.gif)
 
 ## Get Start
 

@@ -1,7 +1,11 @@
 # VirtualScrollByRender 组件 API 文档
 
 ## 概述
-一个高性能的 Vue 3 虚拟滚动组件，仅渲染可见项目以高效处理大型数据集。
+一个高性能的 Vue 3 虚拟滚动组件，检测真实dom元素高度，且仅渲染可见项目以高效处理大型数据集。
+
+## Effect
+![Virtual Scroll By Render Effect](./VirtualScrollByRender.gif)
+
 
 ## 快速开始
 
