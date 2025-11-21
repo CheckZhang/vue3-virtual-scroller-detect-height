@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-import { VirtualScrollBaseRender } from '@vben/elementplusplus';
+// for you, to import VirtualScrollBaseRender from 'vue3-virtual-scroller-detect-height';
+import VirtualScrollBaseRender from './index.vue';
 
 const items = ref<Array<{ content: string; height: number; index: number }>>(
   [],
 );
+
 const virtualScrollRef = ref<InstanceType<
   typeof VirtualScrollBaseRender
 > | null>(null);
@@ -69,26 +71,43 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-[700px] border">
-    <div class="flex h-full w-64 flex-col border-r bg-gray-50 p-4">
-      <div class="font-bold">Navigation</div>
-      <div class="flex-grow overflow-y-auto">
+  <div
+    style="
+      min-height: 500px;
+      height: 100%;
+      display: flex;
+      border: 1px solid #ccc;
+      overflow: hidden;
+    "
+  >
+    <div
+      style="
+        display: flex;
+        height: 100%;
+        width: 160px;
+        flex-direction: column;
+        border-right: 1px solid #ccc;
+        background-color: #fff;
+        padding: 16px;
+      "
+    >
+      <div style="font-weight: bold">Navigation</div>
+      <div style="flex-grow: 1; overflow-y: auto">
         <div
           v-for="item in directoryItems"
           :key="`dd_${item.index}`"
           @click="navigateToItem(item.index)"
-          class="cursor-pointer rounded p-2 hover:bg-blue-100"
+          style="cursor: pointer; border-radius: 5px; padding: 8px"
         >
           {{ item.title }}
         </div>
       </div>
     </div>
 
-    <div class="flex-1">
+    <div style="flex: 1; height: 100%">
       <VirtualScrollBaseRender
         ref="virtualScrollRef"
         :items="items"
-        :container-height="700"
         :visible-items-count="50"
         :buffer-size="50"
         :gap="20"
@@ -115,7 +134,3 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add any custom styles if needed */
-</style>

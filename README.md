@@ -2,7 +2,7 @@
 
 ## Overview
 
-Just 225 lines, A high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it renders only visible items to handle large datasets efficiently.
+Source Code just 238 lines, implyment a high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it support async dom element, and it renders only visible items to handle large datasets efficiently.
 
 ## Get Start
 
@@ -25,7 +25,7 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 ```vue
       <VirtualScrollBaseRender
         :items="items"
-        :container-height="700"
+        style="height: 500px"
       >
         <template #default="{ item, api }">
           <div
@@ -53,7 +53,6 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `items` | `Item[]` | **Required** | Array of items to render. Each item must have an `index` property |
-| `containerHeight` | `number` | `500` | Height of the scroll container in pixels |
 | `visibleItemsCount` | `number` | `50` | Number of items to render in viewport |
 | `estimatedItemHeight` | `number` | `80` | Estimated height for items before measurement |
 | `bufferSize` | `number` | `5` | Number of items to render outside viewport for smooth scrolling |
@@ -63,14 +62,15 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 | Event | Parameters | Description |
 |-------|------------|-------------|
 | `scroll` | `(index: number)` | Emitted when scroll position changes |
-| `remove` | `(index: number, id: string)` | Emitted when an item is removed from DOM |
-| `mouseenter` | `()` | Emitted when mouse enters the container |
 
 ## Exposed Methods
 
 | Method | Parameters | Description |
 |--------|------------|-------------|
 | `scrollToItem` | `(index: number)` | Scrolls to show the specified item at the top |
+| `getCenterItem` |  | Get item at center of viewport
+| `getScrollTop` | | Get current scroll position
+| `measureItemHeight` | `(index: number)` | Measure element height, it's important, should invoke this function in ref function of element, view demo.vue please
 
 ## Exposed Properties
 
@@ -101,11 +101,14 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue';
 
-import VirtualScrollBaseRender from 'vue3-virtual-scroller-detect-height';
+// for you, to import VirtualScrollBaseRender from 'vue3-virtual-scroller-detect-height';
+// for me:
+import VirtualScrollBaseRender from './index.vue';
 
 const items = ref<Array<{ content: string; height: number; index: number }>>(
   [],
 );
+
 const virtualScrollRef = ref<InstanceType<
   typeof VirtualScrollBaseRender
 > | null>(null);
@@ -169,26 +172,43 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex h-[700px] border">
-    <div class="flex h-full w-64 flex-col border-r bg-gray-50 p-4">
-      <div class="font-bold">Navigation</div>
-      <div class="flex-grow overflow-y-auto">
+  <div
+    style="
+      min-height: 500px;
+      height: 100%;
+      display: flex;
+      border: 1px solid #ccc;
+      overflow: hidden;
+    "
+  >
+    <div
+      style="
+        display: flex;
+        height: 100%;
+        width: 160px;
+        flex-direction: column;
+        border-right: 1px solid #ccc;
+        background-color: #fff;
+        padding: 16px;
+      "
+    >
+      <div style="font-weight: bold">Navigation</div>
+      <div style="flex-grow: 1; overflow-y: auto">
         <div
           v-for="item in directoryItems"
           :key="`dd_${item.index}`"
           @click="navigateToItem(item.index)"
-          class="cursor-pointer rounded p-2 hover:bg-blue-100"
+          style="cursor: pointer; border-radius: 5px; padding: 8px"
         >
           {{ item.title }}
         </div>
       </div>
     </div>
 
-    <div class="flex-1">
+    <div style="flex: 1; height: 100%">
       <VirtualScrollBaseRender
         ref="virtualScrollRef"
         :items="items"
-        :container-height="700"
         :visible-items-count="50"
         :buffer-size="50"
         :gap="20"
@@ -199,7 +219,6 @@ onMounted(() => {
             :ref="
               async (ele) => {
                 if (ele) {
-                  // support any async logic here
                   await nextTick();
                   api.measureItemHeight(item.index);
                 }
@@ -216,11 +235,6 @@ onMounted(() => {
     </div>
   </div>
 </template>
-
-<style scoped>
-/* Add any custom styles if needed */
-</style>
-
 ```
 
 ## Features

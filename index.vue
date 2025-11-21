@@ -16,7 +16,7 @@ interface Item {
 
 interface Props {
   bufferSize?: number;
-  containerHeight?: number;
+  containerHeight?: number | string;
   focusPosition?: 'center' | 'end' | 'start';
   gap?: number;
   items: Item[];
@@ -32,15 +32,35 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<{
-  mouseenter: [];
   scroll: [index: number];
 }>();
 
 const items1 = ref<Item[]>(props.items);
+const viewWidth = ref(500);
+const viewHeight = ref(500);
 
 const firstVisibleIndex = ref(0);
 const scrollContainer = ref<HTMLElement | null>(null);
-let mutationObserver: MutationObserver | null = null;
+const rootContainer = ref<HTMLElement | null>(null);
+let observer: ResizeObserver;
+
+const startObserving = () => {
+  observer = new ResizeObserver((entries: ResizeObserverEntry[]) => {
+    const entry = entries[0];
+    if (entry) {
+      const { width, height } = entry.contentRect;
+      viewWidth.value = width;
+      viewHeight.value = height;
+      measureItemHeights();
+    }
+  });
+  observer.observe(rootContainer.value!);
+};
+
+const stopObserving = () => {
+  observer?.unobserve(rootContainer.value!);
+  observer?.disconnect();
+};
 
 const scrollToItem = async (index?: number) => {
   if (index === undefined) {
@@ -54,20 +74,17 @@ const scrollToItem = async (index?: number) => {
   if (!scrollContainer.value || index < 0 || index >= items1.value.length)
     return;
 
-  // Calculate scroll position to show the target item at the top
   let targetScrollTop = 0;
   for (let i = 0; i < index; i++) {
     const item = items1.value[i];
     targetScrollTop += item?.height ?? 0;
   }
 
-  // Set scroll position
   if (props.focusPosition === 'end')
-    targetScrollTop -=
-      props.containerHeight! - (items1.value[index]?.height ?? 0);
+    targetScrollTop -= viewHeight.value - (items1.value[index]?.height ?? 0);
   else if (props.focusPosition === 'center')
     targetScrollTop -=
-      props.containerHeight / 2 - (items1.value[index]?.height ?? 0) / 2 - 50;
+      viewHeight.value / 2 - (items1.value[index]?.height ?? 0) / 2 - 50;
 
   scrollContainer.value.scrollTop = targetScrollTop;
 };
@@ -133,12 +150,11 @@ const onScroll = () => {
   emit('scroll', firstVisibleIndex.value);
 };
 
-function getCenterItem(): Item | null {
-  if (!scrollContainer.value) return null;
+function getCenterItem(): Item | undefined {
+  if (!scrollContainer.value) return;
 
   const scrollTop = scrollContainer.value.scrollTop;
-  const containerHeight = props.containerHeight || 0;
-  const centerPosition = scrollTop + containerHeight / 2;
+  const centerPosition = scrollTop + viewHeight.value / 2;
 
   let cumulativeHeight = 0;
   for (let i = 0; i < items1.value.length; i++) {
@@ -151,7 +167,7 @@ function getCenterItem(): Item | null {
     cumulativeHeight += itemHeight;
   }
 
-  return items1.value[items1.value.length - 1] || null;
+  return items1.value[items1.value.length - 1];
 }
 
 watch(
@@ -176,49 +192,46 @@ const api = {
 
 defineExpose(api);
 
-// Cleanup observer when component unmounts
-const cleanup = () => {
-  if (mutationObserver) {
-    mutationObserver.disconnect();
-    mutationObserver = null;
-  }
-  window.removeEventListener('resize', measureItemHeights);
-};
-
-onBeforeUnmount(cleanup);
+onBeforeUnmount(() => {
+  stopObserving();
+});
 
 onMounted(() => {
-  window.addEventListener('resize', measureItemHeights);
+  startObserving();
+  measureItemHeights();
 });
 </script>
 
 <template>
   <div
-    ref="scrollContainer"
-    class="relative overflow-y-auto"
-    :style="{
-      height: `${containerHeight}px`,
-    }"
-    @scroll="onScroll"
-    @mouseenter="emit('mouseenter')"
+    ref="rootContainer"
+    v-bind="$attrs"
+    style="height: 100%; overflow: hidden"
   >
     <div
-      class="absolute top-0 w-1"
-      :style="{ height: `${proxyHeight}px` }"
-    ></div>
-    <div
-      class="relative flex flex-col"
-      :style="{
-        transform: `translateY(${topSpacerHeight}px)`,
-        gap: `${gap}px`,
-      }"
+      ref="scrollContainer"
+      style="position: relative; overflow-y: auto; min-height: 0"
+      :style="{ height: `${viewHeight}px` }"
+      @scroll="onScroll"
     >
       <div
-        v-for="(item, index) in visibleItems"
-        :key="item.index"
-        :id="`vs_${item.index}`"
+        style="position: absolute; top: 0; width: 8px"
+        :style="{ height: `${proxyHeight}px` }"
+      ></div>
+      <div
+        style="display: flex; flex-direction: column; min-height: 0"
+        :style="{
+          transform: `translateY(${topSpacerHeight}px)`,
+          gap: `${gap}px`,
+        }"
       >
-        <slot :item="item" :index="index" :api="api"></slot>
+        <div
+          v-for="(item, index) in visibleItems"
+          :key="item.index"
+          :id="`vs_${item.index}`"
+        >
+          <slot :item="item" :index="index" :api="api"></slot>
+        </div>
       </div>
     </div>
   </div>
