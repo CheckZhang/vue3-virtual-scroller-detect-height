@@ -2,7 +2,7 @@
 
 ## Overview
 
-A high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it renders only visible items to handle large datasets efficiently.
+Just 225 lines, A high-performance virtual scrolling component for Vue 3,it automatically measures actual hieght by real dom element, it renders only visible items to handle large datasets efficiently.
 
 ## Get Start
 
@@ -17,7 +17,8 @@ yarn add @vue3-virtual-scroller-detect-height
 Then import and use the component in your Vue 3 application:
 
 ```vue
-import { VirtualScrollBaseRender } from '@vben/elementplusplus';
+import { VirtualScrollBaseRender } from '@vue3-virtual-scroller-detect-height';
+// todo: if it doesn't work, copy my /index.vue to your project please
 ```
 
 Then you can use the `VirtualScrollBaseRender` component in your templates.
@@ -198,6 +199,7 @@ onMounted(() => {
             :ref="
               async (ele) => {
                 if (ele) {
+                  // support any async logic here
                   await nextTick();
                   api.measureItemHeight(item.index);
                 }
