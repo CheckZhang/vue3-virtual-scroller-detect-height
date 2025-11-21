@@ -118,6 +118,7 @@ onMounted(() => {
             :ref="
               async (ele) => {
                 if (ele) {
+                  // You can do any async thing for the element, like render element to markdown by some third package
                   await nextTick();
                   api.measureItemHeight(item.index);
                 }
