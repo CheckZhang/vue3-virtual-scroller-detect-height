@@ -123,7 +123,7 @@ const topSpacerHeight = computed(() => {
   return height;
 });
 
-const visibleItems = computed(() => {
+const visibleItems = computed<Item[]>(() => {
   const start = renderStartIndex.value;
   const end = Math.min(
     firstVisibleIndex.value + props.visibleItemsCount + props.bufferSize,
@@ -159,8 +159,15 @@ function getCenterItem(): Item | undefined {
   const scrollTop = scrollContainer.value.scrollTop;
   const centerPosition = scrollTop + viewHeight.value / 2;
 
-  let cumulativeHeight = 0;
-  for (let i = 0; i < items1.value.length; i++) {
+  let cumulativeHeight = topSpacerHeight.value;
+
+  const visible = visibleItems.value;
+  if (visible.length === 0) return;
+
+  const startIndex = visible[0]?.index ?? 0;
+  const endIndex = visible[visible.length - 1]?.index ?? 0;
+
+  for (let i = startIndex; i <= endIndex; i++) {
     const item = items1.value[i];
     const itemHeight = item?.height ?? 0;
 

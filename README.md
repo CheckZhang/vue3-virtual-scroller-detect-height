@@ -102,12 +102,11 @@ Then you can use the `VirtualScrollBaseRender` component in your templates.
 import { computed, nextTick, onMounted, ref } from 'vue';
 
 // for you, to import VirtualScrollBaseRender from 'vue3-virtual-scroller-detect-height';
-// for me:
 import VirtualScrollBaseRender from './index.vue';
 
-const items = ref<Array<{ content: string; height: number; index: number }>>(
-  [],
-);
+const items = ref<
+  Array<{ content: string; height: number; image: string; index: number }>
+>([]);
 
 const virtualScrollRef = ref<InstanceType<
   typeof VirtualScrollBaseRender
@@ -145,10 +144,15 @@ const generateRandomText = () => {
 
 const generateItems = () => {
   for (let i = 0; i < 1000; i++) {
+    const imgHeight = [200, 300, 500][Math.floor(Math.random() * 3)];
     items.value.push({
       index: i,
       height: 0,
       content: generateRandomText(),
+      image:
+        Math.random() > 0.8
+          ? `https://picsum.photos/200/${imgHeight}?random=${Math.random()}`
+          : '',
     });
   }
 };
@@ -219,7 +223,7 @@ onMounted(() => {
             :ref="
               async (ele) => {
                 if (ele) {
-                  // Here, you can do any async thing for the element, like render element to markdown by some third package
+                  // You can do any async thing for the element, like render element to markdown by some third package
                   await nextTick();
                   api.measureItemHeight(item.index);
                 }
@@ -229,6 +233,11 @@ onMounted(() => {
             <div class="mb-2 text-lg font-semibold">
               Item {{ item.index + 1 }}
             </div>
+            <img
+              v-if="item.image"
+              :src="item.image"
+              @load="() => api.measureItemHeight(item.index)"
+            />
             <div class="leading-relaxed text-gray-600">{{ item.content }}</div>
           </div>
         </template>
@@ -236,6 +245,7 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
 ```
 
 ## Features
