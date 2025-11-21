@@ -9,9 +9,9 @@ A high-performance virtual scrolling component for Vue 3,it automatically measur
 first, install the package:
 
 ```bash
-npm install @vben/elementplusplus
+npm install @vue3-virtual-scroller-detect-height
 # or
-yarn add @vben/elementplusplus
+yarn add @vue3-virtual-scroller-detect-height
 ```
 
 Then import and use the component in your Vue 3 application:

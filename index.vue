@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
 
 interface Item {
   [key: string]: any;
@@ -33,7 +40,6 @@ const items1 = ref<Item[]>(props.items);
 
 const firstVisibleIndex = ref(0);
 const scrollContainer = ref<HTMLElement | null>(null);
-const isScrolling = ref(false);
 let mutationObserver: MutationObserver | null = null;
 
 const scrollToItem = async (index?: number) => {
@@ -109,8 +115,6 @@ const visibleItems = computed(() => {
 const onScroll = () => {
   if (!scrollContainer.value) return;
 
-  isScrolling.value = true;
-
   const scrollTop = scrollContainer.value.scrollTop;
   let cumulativeHeight = 0;
   let newFirstIndex = 0;
@@ -125,10 +129,30 @@ const onScroll = () => {
   }
 
   firstVisibleIndex.value = newFirstIndex;
-  isScrolling.value = false;
 
   emit('scroll', firstVisibleIndex.value);
 };
+
+function getCenterItem(): Item | null {
+  if (!scrollContainer.value) return null;
+
+  const scrollTop = scrollContainer.value.scrollTop;
+  const containerHeight = props.containerHeight || 0;
+  const centerPosition = scrollTop + containerHeight / 2;
+
+  let cumulativeHeight = 0;
+  for (let i = 0; i < items1.value.length; i++) {
+    const item = items1.value[i];
+    const itemHeight = item?.height ?? 0;
+
+    if (cumulativeHeight + itemHeight > centerPosition) {
+      return item;
+    }
+    cumulativeHeight += itemHeight;
+  }
+
+  return items1.value[items1.value.length - 1] || null;
+}
 
 watch(
   () => props.items.length,
@@ -146,6 +170,8 @@ const api = {
   renderStartIndex,
   visibleItems,
   measureItemHeight,
+  getCenterItem,
+  getScrollTop: () => scrollContainer.value?.scrollTop ?? 0,
 };
 
 defineExpose(api);
@@ -156,8 +182,14 @@ const cleanup = () => {
     mutationObserver.disconnect();
     mutationObserver = null;
   }
+  window.removeEventListener('resize', measureItemHeights);
 };
+
 onBeforeUnmount(cleanup);
+
+onMounted(() => {
+  window.addEventListener('resize', measureItemHeights);
+});
 </script>
 
 <template>
