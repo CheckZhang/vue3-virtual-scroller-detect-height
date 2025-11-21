@@ -86,7 +86,10 @@ const scrollToItem = async (index?: number) => {
     targetScrollTop -=
       viewHeight.value / 2 - (items1.value[index]?.height ?? 0) / 2 - 50;
 
-  scrollContainer.value.scrollTop = targetScrollTop;
+  scrollContainer.value.scrollTo({
+    top: targetScrollTop,
+    behavior: 'smooth',
+  });
 };
 
 const measureItemHeight = (index: number) => {
